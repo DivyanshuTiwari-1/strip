@@ -29,7 +29,7 @@ export default function CheckoutPage() {
       <div className="w-full max-w-md space-y-4">
         {[
           { name: "1-Week Plan", price: "14.99 EUR", perDay: "2.14 EUR per day" },
-          { name: "1-Month Plan", price: selectedPlan === "1-Month Plan" ? "10 EUR (First Month)" : "39.99 EUR", perDay: "1.34 EUR per day" },
+          { name: "1-Month Plan", price: selectedPlan === "1-Month Plan" ? "0.05 EUR (First Month)" : "39.99 EUR", perDay: "1.34 EUR per day" },
           { name: "3-Month Plan", price: "69.99 EUR", perDay: "0.76 EUR per day" },
         ].map((plan) => (
           <div
