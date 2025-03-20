@@ -46,17 +46,31 @@ function CheckoutForm() {
 
 export default function CheckoutPopup({ isOpen, onClose, amount }: { isOpen: boolean; onClose: () => void; amount: number }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [showMotivational, setShowMotivational] = useState(false);
+
+  const handleClose = () => {
+    setShowMotivational(true); // Show motivational popup instead of closing immediately
+  };
+
+  const handleFinalClose = () => {
+    setShowMotivational(false);
+    onClose();
+  };
+
+  const handleTryRiskFree = () => {
+    setShowMotivational(false); // Hide motivational popup
+  };
 
   useEffect(() => {
-    if (!amount) return;
+    if (!amount || !email) return;
 
     fetch("/api/payment-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amount: amount * 100, // Convert to cents
-        currency: "usd",
-        paymentMethodTypes: ["card",],
+        email,
+        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
       }),
     })
       .then((res) => res.json())
@@ -68,25 +82,89 @@ export default function CheckoutPopup({ isOpen, onClose, amount }: { isOpen: boo
         }
       })
       .catch((error) => console.error("API error:", error));
-  }, [amount]);
+  }, [amount, email]);
 
   if (!isOpen) return null;
+
+  if (showMotivational) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="bg-[#1a1a1a] p-8 rounded-3xl shadow-lg w-[400px] relative border border-gradient">
+          <button
+            onClick={handleFinalClose}
+            className="absolute top-4 right-4 text-gray-400 hover:text-white transition"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="text-center space-y-6">
+            <div className="bg-[#2a2a2a] rounded-2xl p-4 inline-block">
+              <h2 className="text-[#a8c7fa] text-2xl font-semibold mb-1">Not convinced?</h2>
+              <p className="text-[#a8c7fa] text-xl">We get it.</p>
+            </div>
+
+            <h1 className="text-white text-3xl font-bold">
+              Try Aligned for $9.99!
+            </h1>
+
+            <p className="text-gray-300 text-lg">
+              1-week trial for $9.99, renews for a 4-week plan.<br/>
+              Cancel anytime
+            </p>
+
+            <div className="relative h-32">
+              {/* Add your graph visualization here */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-sm text-gray-400 bg-[#2a2a2a] px-3 py-1 rounded-full">with Aligned</div>
+                <div className="text-sm text-gray-400 bg-[#2a2a2a] px-3 py-1 rounded-full ml-4">without Aligned</div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleTryRiskFree}
+              className="w-full bg-white text-black py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition"
+            >
+              Try it risk-free
+            </button>
+
+            <div className="flex items-center justify-center text-gray-400 text-sm">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 mr-2" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/>
+              </svg>
+              14-Day Money-Back Guarantee
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-[400px] relative">
-        {/* Close Button - Positioned Correctly */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition"
         >
           <X size={20} />
         </button>
 
-        {/* Title */}
-        <h2 className="text-xl font-bold mb-4 text-center text-black">Select Payment Method</h2>
+        <h2 className="text-xl font-bold mb-4 text-center text-black">Securely pay</h2>
 
-        {/* Payment Form */}
+        <div className="mb-4">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            required
+          />
+        </div>
+
         {clientSecret ? (
           <Elements stripe={stripePromise} options={{ clientSecret }}>
             <CheckoutForm />

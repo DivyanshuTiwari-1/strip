@@ -1,0 +1,104 @@
+ALIGNED WEB APP - HOW IT WORKS
+
+1. GENERAL OVERVIEW
+-------------------
+The app is built using:
+- Frontend: Next.js (a React framework that makes web apps fast and user-friendly)
+- Payment System: Stripe (handles all money and subscription stuff safely)
+- Backend: Next.js API Routes (handles communication between our app and Stripe)
+
+When someone uses the app:
+1. They see subscription plans on the main page
+2. Click a plan
+3. Enter their email
+4. Enter payment details
+5. Get access to the service
+
+Important Links:
+- Stripe Docs: https://stripe.com/docs
+- Next.js Docs: https://nextjs.org/docs
+- Stripe Subscription Guide: https://stripe.com/docs/billing/subscriptions/overview
+
+2. ABOUT THE 500 ERRORS
+-----------------------
+A 500 error means something went wrong on our server. This usually happens because:
+- The app can't talk to Stripe properly
+- Some important settings are missing
+- The payment information isn't correct
+
+To fix this, we need to:
+- Double-check all our Stripe settings
+- Make sure all required information is being sent correctly
+- Add better error messages to help users understand what went wrong
+
+3. POPUP CUSTOMIZATION
+----------------------
+There are actually two different popups in the payment flow:
+
+First Popup (We control this one):
+- This is our custom popup where users enter their email
+- We can change anything about this popup (colors, text, buttons)
+- Currently shows "Select payment method" - we can change this to "Securely pay"
+- We can make the button green instead of blue
+
+Second Popup (Stripe's popup):
+- This is Stripe's payment form
+- We can only change some basic things like colors
+- This is for security - Stripe handles sensitive payment data
+
+4. EXIT OFFER POPUP
+------------------
+Yes! We can add a special offer popup when someone tries to leave. It would:
+- Show up when clicking the X button
+- Display a special trial offer ($9.99 deal)
+- Show the comparison graph
+- Include the money-back guarantee
+- Give them another chance to subscribe
+
+This is a good way to convince unsure customers by:
+- Offering a better deal
+- Showing the value they'll get
+- Reducing their risk with a guarantee
+
+5. DISCOUNTED PRICING
+--------------------
+The discount system works like this:
+
+First Month:
+- Customer pays the discounted price (like $0.05 or $9.99)
+- This is a one-time special price
+
+Second Month Onwards:
+- Automatically switches to full price
+- Customer pays regular price (like $39.99)
+- This continues monthly until cancelled
+
+This is all handled automatically by Stripe's subscription system. The customer knows upfront that:
+- First month is discounted
+- Regular pricing starts from second month
+- They can cancel anytime
+
+All payment processing is secure and automated - customers don't need to do anything for the price change to happen. 
+
+graph TD
+    A[Landing Page<br/>src/app/page.tsx] -->|User selects plan| B[Checkout Button Click]
+    B -->|Opens Modal| C[Checkout Popup<br/>src/app/components/CheckoutForm.tsx]
+    
+    C -->|User Closes| D[Exit Intent Popup<br/>Special Offer Component]
+    D -->|Accept Offer| C
+    D -->|Decline| E[Close All]
+    
+    C -->|Enter Email| F[Create Payment Intent<br/>src/app/api/payment-intent/route.tsx]
+    F -->|API Call| G[Stripe API]
+    G -->|Returns Client Secret| H[Stripe Elements Form]
+    
+    H -->|Submit Payment| I[Stripe Processing]
+    I -->|Success| J[Success Page<br/>src/app/success/page.tsx]
+    I -->|Failure| K[Error Handler<br/>Shows Error in Form]
+    
+    subgraph "Backend Flow"
+        F -->|1. Create Customer| L[Stripe Customer Created]
+        L -->|2. Create Subscription| M[Stripe Subscription Created]
+        M -->|3. Apply Discount| N[First Month Discount Applied]
+        N -->|4. Return Details| H
+    end 

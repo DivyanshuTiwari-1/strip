@@ -5,13 +5,13 @@ import CheckoutPopup from "../app/components/CheckoutForm";
 export default function CheckoutPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("1-Month Plan");
-  const [amount, setAmount] = useState(39.99); // Default price
+  const [amount, setAmount] = useState(29.99); // Default price
 
   // Handle plan selection
   const handlePlanChange = (plan: string) => {
     setSelectedPlan(plan);
     if (plan === "1-Month Plan") {
-      setAmount(0.05); // Discounted first-month price
+      setAmount(10.99); // Discounted first-month price
     } else if (plan === "3-Month Plan") {
       setAmount(69.99); // Regular price
     } else {
@@ -29,7 +29,7 @@ export default function CheckoutPage() {
       <div className="w-full max-w-md space-y-4">
         {[
           { name: "1-Week Plan", price: "14.99 EUR", perDay: "2.14 EUR per day" },
-          { name: "1-Month Plan", price: selectedPlan === "1-Month Plan" ? "0.05 EUR (First Month)" : "39.99 EUR", perDay: "1.34 EUR per day" },
+          { name: "1-Month Plan", price: selectedPlan === "1-Month Plan" ? "10.99 EUR (First Month)" : "29.99 EUR", perDay: "1.34 EUR per day" },
           { name: "3-Month Plan", price: "69.99 EUR", perDay: "0.76 EUR per day" },
         ].map((plan) => (
           <div
