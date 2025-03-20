@@ -9,8 +9,16 @@ export async function POST(req: Request) {
   try {
     const { email, priceId } = await req.json();
 
-    if (!email || !priceId) {
-      return NextResponse.json({ error: "Email and priceId are required" }, { status: 400 });
+    // Validate inputs
+    if (!email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    }
+
+    if (!priceId) {
+      return NextResponse.json({ 
+        error: "Price ID is missing. Check environment variables.", 
+        debug: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID ? "Price ID exists" : "Price ID missing"
+      }, { status: 400 });
     }
 
     // Ensure the customer exists or create a new one
@@ -66,18 +74,10 @@ export async function POST(req: Request) {
       customerId: customer.id,
     });
   } catch (error: any) {
-    console.error("Stripe API error:", error);
-    
-    if (error.type === 'StripeCardError') {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
-    }
-    
+    console.error("API Error:", error);
     return NextResponse.json(
-      { error: "An error occurred while processing your request" },
-      { status: 500 }
+      { error: "Invalid request data" },
+      { status: 400 }
     );
   }
 }

@@ -48,6 +48,8 @@ export default function CheckoutPopup({ isOpen, onClose, amount }: { isOpen: boo
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [showMotivational, setShowMotivational] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleClose = () => {
     setShowMotivational(true); // Show motivational popup instead of closing immediately
@@ -63,7 +65,10 @@ export default function CheckoutPopup({ isOpen, onClose, amount }: { isOpen: boo
   };
 
   useEffect(() => {
-    if (!amount || !email) return;
+    if (!email) return;
+    
+    setIsLoading(true);
+    setError('');
 
     fetch("/api/payment-intent", {
       method: "POST",
@@ -73,16 +78,23 @@ export default function CheckoutPopup({ isOpen, onClose, amount }: { isOpen: boo
         priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
       }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
-        } else {
-          console.error("Error generating clientSecret:", data);
+      .then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || 'Payment setup failed');
         }
+        return res.json();
       })
-      .catch((error) => console.error("API error:", error));
-  }, [amount, email]);
+      .then((data) => {
+        setClientSecret(data.clientSecret);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [email]);
 
   if (!isOpen) return null;
 
@@ -165,7 +177,22 @@ export default function CheckoutPopup({ isOpen, onClose, amount }: { isOpen: boo
           />
         </div>
 
-        {clientSecret ? (
+        {isLoading ? (
+          <div className="text-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-2">Setting up payment...</p>
+          </div>
+        ) : error ? (
+          <div className="text-red-500 p-4 text-center">
+            <p>{error}</p>
+            <button 
+              onClick={() => setError('')}
+              className="mt-2 text-sm text-gray-600 underline"
+            >
+              Try again
+            </button>
+          </div>
+        ) : clientSecret ? (
           <Elements stripe={stripePromise} options={{ clientSecret }}>
             <CheckoutForm />
           </Elements>
