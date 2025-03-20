@@ -11,7 +11,7 @@ export default function CheckoutPage() {
   const handlePlanChange = (plan: string) => {
     setSelectedPlan(plan);
     if (plan === "1-Month Plan") {
-      setAmount(10); // Discounted first-month price
+      setAmount(0.05); // Discounted first-month price
     } else if (plan === "3-Month Plan") {
       setAmount(69.99); // Regular price
     } else {
