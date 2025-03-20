@@ -20,7 +20,7 @@ function CheckoutForm() {
 
     const { error } = await stripe.confirmPayment({
       elements,
-      confirmParams: { return_url: "https://strip-omega.vercel.app/comopnents/success" },
+      confirmParams: { return_url: "https://strip-omega.vercel.app/success" },
     });
 
     if (error) {
