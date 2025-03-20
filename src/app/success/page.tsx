@@ -31,6 +31,11 @@ function SuccessContent() {
       </h1>
       <p className="text-gray-600 mb-6">
         Thank you for your purchase. Your subscription is now active.
+        {status === 'succeeded' && (
+          <span className="block mt-2 text-sm">
+            Payment ID: {paymentIntent}
+          </span>
+        )}
       </p>
       <Link
         href="/"
@@ -44,10 +49,10 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <Suspense fallback={<div>Loading...</div>}>
+    <div className="min-h-screen bg-black flex items-center justify-center p-6">
+      <Suspense fallback={<div className="text-white">Loading...</div>}>
         <SuccessContent />
       </Suspense>
     </div>
   );
-}
+} 
